@@ -9,12 +9,13 @@ import {
   IonToolbar
 } from '@ionic/react';
 import { useLocalStorage } from '../../utils/useLocalStorage.util';
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { useMaskito } from '@maskito/react';
 import cnm from '../../utils/cnm.util';
+import { ChatContext } from '../../modules/chat/chat.context';
 
 function PickName({ history }:  any) {
-  const [ displayName, setDisplayName ] = useLocalStorage('displayName', '');
+  const { chat, displayName, setDisplayName } = useContext(ChatContext);
 
   const [ displayNameInput, setDisplayNameInput ] = useState(displayName);
   const [isTouched, setIsTouched] = useState(false);
@@ -38,15 +39,19 @@ function PickName({ history }:  any) {
     setDisplayNameInput(event.target.value);
   }, [validate])
 
+
   const handleSave = useCallback(() => {
-    if(isValid) {
+    if(isValid && !chat) {
       setDisplayName(displayNameInput);
       // navigate to home
-      history.replace('/home')
+      window.location.replace('/home')
+    } else if(isValid && chat) {
+      setDisplayName(displayNameInput);
+      window.location.replace('/home')
     } else {
       setIsTouched(true);
     }
-  }, [displayNameInput, isValid]);
+  }, [displayNameInput, isValid, history, chat]);
 
 
   return (

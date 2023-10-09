@@ -1,31 +1,26 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonMenuButton, IonPage, IonText, IonTitle, IonToolbar, useIonRouter } from '@ionic/react';
 import './Home.css';
 import { useLocalStorage } from '../../utils/useLocalStorage.util';
 import { useContext, useEffect } from 'react';
 import { ChatContext } from '../../modules/chat/chat.context';
 import { Chat } from '@pubnub/chat';
+import { RouteComponentProps, useParams } from 'react-router';
+import { chatbubbleOutline } from 'ionicons/icons';
 
-const Page: React.FC = () => {
+const Home: React.FC = () => {
+  const { chat, displayName } = useContext(ChatContext);
 
-  const [ displayName ] = useLocalStorage('displayName', '');
-
-  const { chat, setChat} = useContext(ChatContext);
-
-  // initialize pubnub chat sdk
-  useEffect(() => {
-    if(!chat && displayName) {
-      Chat.init({
-        subscribeKey: import.meta.env.VITE_PUBNUB_SUBSCRIBE_KEY,
-        publishKey: import.meta.env.VITE_PUBNUB_PUBLISH_KEY,
-        userId: displayName + '_user',
-      }).then((chat) => {
-        setChat(chat);
-      })
-    }
-  }, [displayName]);
+  const router = useIonRouter();
 
   return (
     <IonPage>
+      <IonFab slot="fixed" horizontal="end" vertical="bottom">
+        <IonFabButton onClick={()=>{
+          router.push('/contact-picker');
+        }}>
+          <IonIcon icon={chatbubbleOutline}></IonIcon>
+        </IonFabButton>
+      </IonFab>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
@@ -41,10 +36,14 @@ const Page: React.FC = () => {
             <IonTitle size="large">{displayName}</IonTitle>
           </IonToolbar>
         </IonHeader>
-        
+        <IonText>
+          <h1>Welcome!</h1>
+          <p>Click on the menu button to view your conversations,
+            or use the floating button to start a new conversation.</p>
+        </IonText>
       </IonContent>
     </IonPage>
   );
 };
 
-export default Page;
+export default Home;

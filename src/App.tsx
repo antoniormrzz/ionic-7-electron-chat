@@ -24,9 +24,12 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import PickName from './pages/PickName/PickName';
 import { useLocalStorage } from './utils/useLocalStorage.util';
-import { useState } from 'react';
-import { Chat } from '@pubnub/chat';
 import { ChatContext } from './modules/chat/chat.context';
+import { Chat, Membership } from '@pubnub/chat';
+import { useCallback, useEffect, useState } from 'react';
+import { initializeChatForUser } from './modules/chat/chat.utils';
+import ChatPage from './pages/Chat/ChatPage';
+import ContactPicker from './pages/ContactPicker/ContactPicker';
 
 setupIonicReact();
 
@@ -35,22 +38,44 @@ function App() {
 
   const [ chat, setChat ] = useState<Chat>();
 
+  useEffect(() => {
+    if(!chat && displayName) {
+      initializeChatForUser(displayName).then((chat) => {
+        setChat(chat);
+      })
+    }
+  }, [displayName, chat]);
+
+  const [ activeConversationId, setActiveConversationId ] = useState<string>();
+  const [ conversations, setConversations ] = useState<Membership[]>();
+
   return (
-    <ChatContext.Provider value={{ chat: chat as Chat, setChat }}>
+    <ChatContext.Provider value={{ chat: chat as Chat, displayName, setDisplayName, setActiveConversationId }}>
       <IonApp>
         <IonReactRouter>
           <IonSplitPane contentId="main">
-            <Menu />
+            {
+              displayName ? (
+                <Menu
+                  conversations={conversations}
+                  setConversations={setConversations}
+                  setActiveConversationId={setActiveConversationId}
+                  activeConversationId={activeConversationId}
+                />
+              ) : null
+            }
             <IonRouterOutlet id="main">
               <Route path="/" exact={true}>
                 {displayName ? <Redirect to="/home" /> : <Redirect to="/pick-name" />}
               </Route>
-              <Route path="/pick-name" exact={true}>
-                <PickName />
+              <Route path="/pick-name" exact component={PickName}/>
+              <Route path="/contact-picker" exact component={ContactPicker}/>
+              <Route path="/chat" exact>
+                <ChatPage
+                  activeConversationId={activeConversationId}
+                />
               </Route>
-              <Route path="/home" exact={true}>
-                <Home />
-              </Route>
+              <Route path="/home" exact component={Home}/>
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>

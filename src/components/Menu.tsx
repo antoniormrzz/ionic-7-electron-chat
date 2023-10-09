@@ -10,9 +10,12 @@ import {
   IonNote,
 } from '@ionic/react';
 
-import { useLocation } from 'react-router-dom';
-import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import { useHistory, useLocation } from 'react-router-dom';
+import { archiveOutline, archiveSharp, bookmarkOutline, chatbubblesOutline, chatbubblesSharp, heartOutline, heartSharp, homeOutline, homeSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, pencilOutline, pencilSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import './Menu.css';
+import { Channel, Membership } from '@pubnub/chat';
+import { useCallback, useContext, useEffect } from 'react';
+import { ChatContext } from '../modules/chat/chat.context';
 
 interface AppPage {
   url: string;
@@ -23,54 +26,51 @@ interface AppPage {
 
 const appPages: AppPage[] = [
   {
-    title: 'Inbox',
-    url: '/page/Inbox',
-    iosIcon: mailOutline,
-    mdIcon: mailSharp
+    title: 'Home',
+    url: '/home',
+    iosIcon: homeOutline,
+    mdIcon: homeSharp
   },
   {
-    title: 'Outbox',
-    url: '/page/Outbox',
-    iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp
-  },
-  {
-    title: 'Favorites',
-    url: '/page/Favorites',
-    iosIcon: heartOutline,
-    mdIcon: heartSharp
-  },
-  {
-    title: 'Archived',
-    url: '/page/Archived',
-    iosIcon: archiveOutline,
-    mdIcon: archiveSharp
-  },
-  {
-    title: 'Trash',
-    url: '/page/Trash',
-    iosIcon: trashOutline,
-    mdIcon: trashSharp
-  },
-  {
-    title: 'Spam',
-    url: '/page/Spam',
-    iosIcon: warningOutline,
-    mdIcon: warningSharp
+    title: 'Change Display Name',
+    url: '/pick-name',
+    iosIcon: pencilOutline,
+    mdIcon: pencilSharp
   }
 ];
 
-const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
+type MenuProps = {
+  conversations?: Membership[];
+  setConversations: (conversations: Membership[]) => void;
+  activeConversationId: string | undefined;
+  setActiveConversationId: (id: string) => void;
+}
 
-const Menu: React.FC = () => {
+const Menu: React.FC<MenuProps> = ({
+  conversations = [],
+  setConversations,
+  activeConversationId,
+  setActiveConversationId
+}: MenuProps) => {
   const location = useLocation();
+
+  const { chat } = useContext(ChatContext);
+
+  useEffect(() => {
+    if(chat) {
+      chat.currentUser.getMemberships().then((_conversations) => {
+        setConversations(_conversations.memberships);
+      })
+    }
+  }, [chat])
+
+  const history = useHistory();
 
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Inbox</IonListHeader>
-          <IonNote>hi@ionicframework.com</IonNote>
+          <IonListHeader>Pages</IonListHeader>
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
@@ -84,11 +84,29 @@ const Menu: React.FC = () => {
         </IonList>
 
         <IonList id="labels-list">
-          <IonListHeader>Labels</IonListHeader>
-          {labels.map((label, index) => (
-            <IonItem lines="none" key={index}>
-              <IonIcon aria-hidden="true" slot="start" icon={bookmarkOutline} />
-              <IonLabel>{label}</IonLabel>
+          <IonListHeader>Conversations</IonListHeader>
+          {conversations.map((conversation) => (
+            <IonItem
+              button
+              lines="none"
+              key={conversation.channel.id}
+              onClick={() => {
+                setActiveConversationId(conversation.channel.id);
+                if(history.location.pathname !== '/chat') {
+                  history.push('/chat');
+                }
+              }}
+            >
+              <IonIcon
+                aria-hidden="true"
+                slot="start"
+                icon={conversation.channel.id === activeConversationId ? chatbubblesSharp : chatbubblesOutline}
+              />
+              <IonLabel
+                className={conversation.channel.id === activeConversationId ? 'selected' : ''}
+              >
+                {conversation.channel.name}
+              </IonLabel>
             </IonItem>
           ))}
         </IonList>
