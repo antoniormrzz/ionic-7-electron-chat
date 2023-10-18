@@ -1,4 +1,10 @@
-import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
+import {
+  IonApp,
+  IonRouterOutlet,
+  IonSplitPane,
+  IonToast,
+  setupIonicReact
+} from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
 import Menu from './components/Menu';
@@ -34,20 +40,48 @@ import ContactPicker from './pages/ContactPicker/ContactPicker';
 setupIonicReact();
 
 function App() {
-  const [ displayName, setDisplayName ] = useLocalStorage('displayName', '');
+  const [displayName, setDisplayName] = useLocalStorage('displayName', '');
 
-  const [ chat, setChat ] = useState<Chat>();
+  const [chat, setChat] = useState<Chat>();
 
+  // initialize chat for user
   useEffect(() => {
-    if(!chat && displayName) {
+    if (!chat && displayName) {
       initializeChatForUser(displayName).then((chat) => {
         setChat(chat);
       })
     }
   }, [displayName, chat]);
 
-  const [ activeConversationId, setActiveConversationId ] = useState<string>();
-  const [ conversations, setConversations ] = useState<Membership[]>();
+  const [activeConversationId, setActiveConversationId] = useState<string>();
+  const [conversations, setConversations] = useState<Membership[]>();
+
+
+  const [eventText, setEventText] = useState<string>('');
+  const [eventToastOpen, setEventToastOpen] = useState<boolean>(false);
+
+  // Listen for mentions and show a toast
+  // note that channel is the user's id for mention events
+  useEffect(() => {
+    let unsub: () => void;
+    if (chat) {
+      chat.listenForEvents({
+        channel: chat.currentUser.id,
+        type: "mention",
+        method: "publish",
+        callback: (event) => {
+          chat.getChannel(event.payload.channel).then((_channel) => {
+            setEventText(`${event.userId} mentioned you in ${_channel?.name}`);
+            setEventToastOpen(true);
+          })
+        }
+      })
+    }
+
+    return () => {
+      unsub && unsub();
+    }
+  }, [chat]);
 
   return (
     <ChatContext.Provider value={{ chat: chat as Chat, displayName, setDisplayName, setActiveConversationId }}>
@@ -68,17 +102,24 @@ function App() {
               <Route path="/" exact={true}>
                 {displayName ? <Redirect to="/home" /> : <Redirect to="/pick-name" />}
               </Route>
-              <Route path="/pick-name" exact component={PickName}/>
-              <Route path="/contact-picker" exact component={ContactPicker}/>
+              <Route path="/pick-name" exact component={PickName} />
+              <Route path="/contact-picker" exact component={ContactPicker} />
               <Route path="/chat" exact>
                 <ChatPage
                   activeConversationId={activeConversationId}
                 />
               </Route>
-              <Route path="/home" exact component={Home}/>
+              <Route path="/home" exact component={Home} />
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>
+        <IonToast
+          isOpen={eventToastOpen}
+          message={eventText}
+          onDidDismiss={() => setEventToastOpen(false)}
+          duration={3000}
+          color={'success'}
+        ></IonToast>
       </IonApp>
     </ChatContext.Provider>
   );

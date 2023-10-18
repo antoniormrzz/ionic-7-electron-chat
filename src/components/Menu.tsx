@@ -6,15 +6,13 @@ import {
   IonList,
   IonListHeader,
   IonMenu,
-  IonMenuToggle,
-  IonNote,
+  IonMenuToggle
 } from '@ionic/react';
 
 import { useHistory, useLocation } from 'react-router-dom';
 import { archiveOutline, archiveSharp, bookmarkOutline, chatbubblesOutline, chatbubblesSharp, heartOutline, heartSharp, homeOutline, homeSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, pencilOutline, pencilSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import './Menu.css';
-import { Channel, Membership } from '@pubnub/chat';
-import { useCallback, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { ChatContext } from '../modules/chat/chat.context';
 
 interface AppPage {
@@ -39,9 +37,10 @@ const appPages: AppPage[] = [
   }
 ];
 
+// type set to any to carry the extra property of unreadMessagesCount
 type MenuProps = {
-  conversations?: Membership[];
-  setConversations: (conversations: Membership[]) => void;
+  conversations?: any[];
+  setConversations: (conversations: any[]) => void; // memberships
   activeConversationId: string | undefined;
   setActiveConversationId: (id: string) => void;
 }
@@ -56,11 +55,23 @@ const Menu: React.FC<MenuProps> = ({
 
   const { chat } = useContext(ChatContext);
 
+  // get all channels that the user is a member of,
+  // and get the unread messages count for each channel
   useEffect(() => {
-    if(chat) {
+    if (chat) {
       chat.currentUser.getMemberships().then((_conversations) => {
-        setConversations(_conversations.memberships);
+        chat.getUnreadMessagesCounts().then((_unreadMessagesCounts) => {
+          const _conversationsWithUnreadMessages = _conversations.memberships.map((_conversation) => {
+            const _unreadMessagesCount = _unreadMessagesCounts.find((_uMC) => _uMC.channel.id === _conversation.channel.id)?.count || 0;
+            return {
+              ..._conversation,
+              unreadMessagesCount: _unreadMessagesCount
+            }
+          })
+          setConversations(_conversationsWithUnreadMessages);
+        })
       })
+
     }
   }, [chat])
 
@@ -92,7 +103,7 @@ const Menu: React.FC<MenuProps> = ({
               key={conversation.channel.id}
               onClick={() => {
                 setActiveConversationId(conversation.channel.id);
-                if(history.location.pathname !== '/chat') {
+                if (history.location.pathname !== '/chat') {
                   history.push('/chat');
                 }
               }}
@@ -105,7 +116,7 @@ const Menu: React.FC<MenuProps> = ({
               <IonLabel
                 className={conversation.channel.id === activeConversationId ? 'selected' : ''}
               >
-                {conversation.channel.name}
+                {`${conversation.channel.name} (${conversation.unreadMessagesCount})`}
               </IonLabel>
             </IonItem>
           ))}

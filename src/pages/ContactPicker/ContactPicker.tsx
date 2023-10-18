@@ -1,11 +1,25 @@
-import { IonBackButton, IonButton, IonButtons, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonMenuButton, IonPage, IonText, IonTitle, IonToolbar, useIonRouter } from '@ionic/react';
+import {
+  IonBackButton,
+  IonButton,
+  IonButtons,
+  IonCheckbox,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  useIonRouter
+} from '@ionic/react';
 import './ContactPicker.css';
-import { useLocalStorage } from '../../utils/useLocalStorage.util';
 import { useContext, useEffect, useState } from 'react';
 import { ChatContext } from '../../modules/chat/chat.context';
-import { Chat, User } from '@pubnub/chat';
-import { RouteComponentProps, useParams } from 'react-router';
-import { chatbubbleOutline, createOutline } from 'ionicons/icons';
+import { User } from '@pubnub/chat';
+import { createOutline } from 'ionicons/icons';
+import moment from 'moment';
 
 const ContactPicker: React.FC = () => {
   const { chat, displayName, setActiveConversationId } = useContext(ChatContext);
@@ -28,6 +42,7 @@ const ContactPicker: React.FC = () => {
     if (chat) {
       if (selectedContactIds.length === 1) {
         const selectedContact = contacts.find((_contact) => _contact.id === selectedContactIds[0]);
+        // create a direct channel with the selected contact
         chat.createDirectConversation({
           user: selectedContact as User,
           channelData: {
@@ -41,6 +56,7 @@ const ContactPicker: React.FC = () => {
         const mappedContacts = (selectedContactIds
           .map((_id) => contacts.find((_contact) => _contact.id === _id)) as User[])
           .sort((_a, _b) => _a.id.localeCompare(_b.id));
+        // create a group channel with the selected contacts
         chat.createGroupConversation({
           users: mappedContacts,
           channelId: `group_${mappedContacts.length}_${Date.now()}`,
@@ -59,6 +75,7 @@ const ContactPicker: React.FC = () => {
 
   useEffect(() => {
     if (chat) {
+      // get all users that are not the current user
       chat.getUsers({}).then((_results) => {
         setContacts(_results.users.filter((_user) => _user.id !== chat.currentUser.id));
       });
@@ -93,7 +110,7 @@ const ContactPicker: React.FC = () => {
         <IonList className='h-full'>
           {contacts.map((contact) => (
             <IonItem key={contact.id} onClick={() => handleItemClicked(contact)}>
-              <IonLabel>{contact.name}</IonLabel>
+              <IonLabel>{contact.name} {moment((contact.lastActiveTimestamp) ?? Date.now()).fromNow()}</IonLabel>
               <IonCheckbox checked={selectedContactIds.includes(contact.id)} />
             </IonItem>
           ))}
