@@ -4,14 +4,14 @@
  PubNub logo and name belong to [PubNub](https://www.pubnub.com/).
  
 This repository contains a chat application built with Ionic 7, React, Electron, and the PubNub Chat SDK. It serves as a demonstration of the capabilities of the Chat SDK and provides an example for building your own chat applications.
-This is not an official example repository of the Chat SDK. Please refer to [The Official Docs](https://www.pubnub.com/docs/chat/chat-sdk/build/sample-chat) for that.
+This is not an official example repository of [the Chat SDK](https://www.npmjs.com/package/@pubnub/chat). Please refer to [The Official Docs](https://www.pubnub.com/docs/chat/chat-sdk/build/sample-chat) for that.
 
 ## Table of Contents
 
 - [Features](#features)
+- [Official Documentation](#documentation)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Documentation](#documentation)
 - [License](#license)
 
 ## Features
@@ -28,7 +28,13 @@ Covers most of the PubNub Chat SDK version 0.1.0 functionality:
 - Mention users, Link to other conversations, Format Links
 - Send Images, GIFs, Videos, Audio, and other files 
 - Report users
-- Get notified by listening for predefined and custom events (mention, messages, reports, etc)
+- Get notified by listening for predefined and custom events (mentions, messages, reports, etc)
+
+## Official Documentation
+- [Official Docs](https://www.pubnub.com/docs/chat/chat-sdk/overview)
+- [Why Chat SDK?](https://www.pubnub.com/docs/chat/chat-sdk/learn/why-chat-sdk)
+- [Getting Started](https://www.pubnub.com/docs/chat/chat-sdk/build/configuration)
+- [(Advanced) Authentication and Authorization](https://www.pubnub.com/docs/general/security/access-control)
 
 ## Installation
 
@@ -67,13 +73,6 @@ Learn how to get your free demo keys [here](https://www.pubnub.com/docs/chat/cha
    ```bash
    npm start
    ```
-
-Sign in or create a new account to start using the chat features.
-
-## Documentation
-[Official Docs](https://www.pubnub.com/docs/chat/chat-sdk/overview)
-[Getting Started](https://www.pubnub.com/docs/chat/chat-sdk/build/configuration)
-[Why Chat SDK?](https://www.pubnub.com/docs/chat/chat-sdk/learn/why-chat-sdk)
 
 ## License
 I don't remember, but take what you need from my code, lol.
