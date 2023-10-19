@@ -40,18 +40,18 @@ Covers most of the PubNub Chat SDK version 0.1.0 functionality:
    
 2. Change to the project directory:
 
-  ```bash
-  cd ionic-7-electron-chat
-  ```
+   ```bash
+   cd ionic-7-electron-chat
+   ```
 3. Install dependencies:
 
-  ```bash
-  npm install
-  ```
+   ```bash
+   npm install
+   ```
 4. Create a `.env.local` file in project's root directory and add the following keys:
    ```bash
-     VITE_PUBNUB_PUBLISH_KEY=pub-c-...
-     VITE_PUBNUB_SUBSCRIBE_KEY=sub-c-...
+   VITE_PUBNUB_PUBLISH_KEY=pub-c-...
+   VITE_PUBNUB_SUBSCRIBE_KEY=sub-c-...
    ```
 Learn how to get your free demo keys [here](https://www.pubnub.com/docs/chat/chat-sdk/build/configuration).
 
@@ -60,12 +60,12 @@ Learn how to get your free demo keys [here](https://www.pubnub.com/docs/chat/cha
 - To run the app in your browser (recommended for [HMR](https://webpack.js.org/concepts/hot-module-replacement/)):
 
    ```bash
-     npm run dev
+   npm run dev
    ```
 - To run the app in Electron:
 
    ```bash
-     npm start
+   npm start
    ```
 
 Sign in or create a new account to start using the chat features.
