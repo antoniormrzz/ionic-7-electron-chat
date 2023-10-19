@@ -54,7 +54,7 @@ Covers most of the PubNub Chat SDK version 0.1.0 functionality:
    ```bash
    npm install
    ```
-4. Create a `.env.local` file in project's root directory and add the following keys:
+4. Create a `.env.local` file in the project's root directory and add your demo keys:
    ```bash
    VITE_PUBNUB_PUBLISH_KEY=pub-c-...
    VITE_PUBNUB_SUBSCRIBE_KEY=sub-c-...
